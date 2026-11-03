@@ -1,1 +1,150 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080b16"><title>IMPLEXITY SKY</title><link rel="stylesheet" href="style.css"></head><body><main id="login" class="login"><div class="logo">IS<span>✦</span></div><p class="eyebrow">PRIVATE COMMUNICATION NETWORK</p><h1>IMPLEXITY <i>SKY</i></h1><p class="muted">Your space. Your conversations. Connected.</p><form id="loginForm" class="panel"><label>USERNAME<input id="username" required autocomplete="username"></label><label>PASSWORD<input id="password" type="password" required autocomplete="current-password"></label><button class="primary">ENTER NETWORK ↗</button><p id="loginError" class="error"></p><small>Accounts are issued by your administrator.</small></form></main><div id="app" class="app hidden"><aside id="sidebar"><div class="sidebrand"><b>IMPLEXITY SKY</b><small>MESSAGING NETWORK</small></div><div class="me"><span id="myInitial" class="avatar">?</span><div><b id="myName">Member</b><small id="myRole">MEMBER</small></div><button id="logout" class="icon">↪</button></div><p class="eyebrow">CHANNELS</p><button id="groupBtn" class="member active">◎ &nbsp; Everyone <small>GROUP</small></button><p class="eyebrow">MEMBERS <span id="count"></span></p><div id="members"></div><div id="admin" class="hidden"><p class="eyebrow">ADMIN CONSOLE</p><button id="createMember" class="member">＋ Create member</button><button id="clearGroup" class="member danger">⌫ Clear group history</button></div><footer>● ENCRYPTED CONNECTION</footer></aside><section class="chat"><header><div><p id="kind" class="eyebrow">PUBLIC CHANNEL</p><h2 id="chatTitle">Everyone</h2><small id="subtitle">Messages visible to all members</small></div><button id="clearChat" class="outline hidden">Clear chat</button><button id="notify" class="outline">♧ Enable notifications</button><button id="mobileMenu" class="outline mobile">Members</button></header><div id="messages" class="messages"><div class="empty"><b>✦</b><h3>Start the conversation</h3><p>Your messages appear here in real time.</p></div></div><form id="sendForm" class="composer"><textarea id="message" maxlength="4000" rows="2" placeholder="Write a message… use @username to mention" required></textarea><div><small>ENTER TO SEND · SHIFT + ENTER FOR NEW LINE</small><button class="send">SEND ➤</button></div></form></section></div><dialog id="memberDialog"><form id="memberForm"><button type="button" class="close" data-close>×</button><p class="eyebrow">ADMIN CONSOLE</p><h3>Create member</h3><label>USERNAME<input id="newUsername" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_.-]+"></label><label>TEMPORARY PASSWORD<input id="newPassword" type="password" required minlength="8"></label><p id="memberError" class="error"></p><button class="primary">CREATE ACCOUNT</button></form></dialog><div id="toast"></div><script type="module" src="app.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON CHAT</title>
+<style>
+:root{--grad-1:#ff00cc;--grad-2:#3333ff;--grad-3:#00d4ff;--panel-bg:rgba(10,10,25,.9);--neon-border:rgba(255,255,255,.1);--neon-green:#00ffcc}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',Roboto,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;color:#fff;background:linear-gradient(-45deg,#050505,#1a1a2e,#16213e,#0f3460);background-size:400% 400%;animation:bg 15s ease infinite}
+@keyframes bg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+button{position:relative;background:rgba(255,255,255,.05);color:#fff;border:2px solid var(--neon-green);padding:10px 20px;border-radius:12px;font-weight:800;cursor:pointer;overflow:hidden;transition:all .3s;text-transform:uppercase;font-size:11px;letter-spacing:1px;display:flex;align-items:center;justify-content:center}
+button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:.5s}
+button:hover::before{left:100%}
+button:hover{transform:translateY(-3px);background:var(--neon-green);color:#000;box-shadow:0 0 30px rgba(0,255,204,.5)}
+.btn-clear{border-color:#ff4b2b;color:#ff4b2b}.btn-clear:hover{background:#ff4b2b;color:#fff;box-shadow:0 0 30px rgba(255,75,43,.5)}
+.btn-back{border-color:var(--grad-3);color:var(--grad-3)}.btn-back:hover{background:var(--grad-3);color:#000;box-shadow:0 0 30px rgba(0,212,255,.5)}
+.logo{font-size:1.4rem;font-weight:900;background:linear-gradient(to right,var(--grad-1),var(--grad-3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+input{background:rgba(255,255,255,.05);color:var(--neon-green);border:2px solid var(--neon-border);border-radius:12px;padding:12px 16px;font-size:15px;outline:none;font-family:inherit;width:100%}
+input:focus{border-color:var(--neon-green)}
+#login{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:100;background:rgba(5,5,5,.85);backdrop-filter:blur(25px);gap:16px;padding:20px}
+.studio-title{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:900;margin:0 0 20px;background:linear-gradient(to right,var(--grad-1),var(--grad-3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(255,0,204,.5));letter-spacing:-2px}
+#login form{width:min(360px,100%);padding:40px 32px;background:var(--panel-bg);border:1px solid var(--neon-border);border-radius:30px;display:flex;flex-direction:column;gap:14px}
+#login form:focus-within{border-color:var(--grad-1);box-shadow:0 0 60px rgba(255,0,204,.2)}
+#err{color:#ff5555;font-size:13px;min-height:16px;text-align:center}
+#app{display:none;flex:1;flex-direction:column;min-height:0}
+header{padding:12px 24px;background:rgba(0,0,0,.7);backdrop-filter:blur(15px);border-bottom:2px solid var(--neon-border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.tool-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#whoami{color:#888;font-size:12px;font-weight:800}
+.container{display:grid;grid-template-columns:270px 1fr;flex:1;gap:20px;padding:20px;min-height:0}
+.panel{background:var(--panel-bg);border-radius:24px;border:1px solid var(--neon-border);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.panel-header{padding:12px 22px;background:rgba(255,255,255,.03);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--neon-border);font-size:11px;font-weight:800;color:#888;text-transform:uppercase;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--grad-1);box-shadow:0 0 8px var(--grad-1)}
+#members{overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.mem{padding:12px 16px;border-radius:14px;border:1px solid var(--neon-border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:.25s;font-weight:700;font-size:14px}
+.mem:hover{border-color:var(--grad-3);transform:translateX(4px)}
+.mem.active{border-color:var(--grad-1);box-shadow:0 0 20px rgba(255,0,204,.25);background:rgba(255,0,204,.08)}
+.mem small{color:#888;font-weight:600}
+.kick{padding:4px 8px;font-size:10px;border-color:#ff4b2b;color:#ff4b2b}
+#msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:75%;padding:10px 14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--neon-border);align-self:flex-start;word-wrap:break-word;position:relative}
+.msg.mine{align-self:flex-end;background:rgba(0,255,204,.08);border-color:rgba(0,255,204,.35)}
+.msg b{font-size:12px;color:var(--grad-3);cursor:pointer;display:inline-block;margin-right:8px}
+.msg.mine b{color:var(--neon-green);cursor:default}
+.msg time{font-size:10px;color:#777}
+.msg .txt{margin-top:3px;font-size:15px;line-height:1.45;white-space:pre-wrap}
+.mention{color:var(--grad-1);font-weight:800}.mention.me{background:rgba(255,0,204,.2);border-radius:6px;padding:0 4px}
+.del{position:absolute;top:6px;right:6px;padding:0 7px;font-size:11px;border-width:1px;border-color:#ff4b2b;color:#ff4b2b;border-radius:8px}
+#sendbar{display:flex;gap:10px;padding:14px;border-top:1px solid var(--neon-border)}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a0a19;border:2px solid var(--neon-green);padding:12px 22px;border-radius:14px;font-weight:700;display:none;z-index:200;box-shadow:0 0 30px rgba(0,255,204,.4)}
+@media(max-width:760px){.container{grid-template-columns:1fr;grid-template-rows:150px 1fr;padding:12px;gap:12px}.msg{max-width:90%}}
+</style>
+</head>
+<body>
+<div id="login">
+  <h1 class="studio-title">NEON CHAT</h1>
+  <form id="loginForm">
+    <input id="u" placeholder="Username" autocomplete="username" required>
+    <input id="p" type="password" placeholder="Password" autocomplete="current-password" required>
+    <button type="submit">Log in</button>
+    <div id="err"></div>
+  </form>
+</div>
+<div id="app">
+  <header>
+    <div class="logo">NEON // CHAT</div>
+    <div class="tool-bar">
+      <span id="whoami"></span>
+      <button id="notifBtn" class="btn-back">Enable notifications</button>
+      <button class="btn-clear admin-only" id="clearBtn" style="display:none">Clear history</button>
+      <button class="btn-clear admin-only" id="kickAllBtn" style="display:none">Log out others</button>
+      <button class="btn-back admin-only" id="monBtn" style="display:none">Monitor DM</button>
+      <button class="btn-clear" id="outBtn">Log out</button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="panel"><div class="panel-header">Members <div class="dot"></div></div><div id="members"></div></div>
+    <div class="panel">
+      <div class="panel-header"><span id="chatTitle">Group chat</span><div class="dot" style="background:var(--grad-3);box-shadow:0 0 8px var(--grad-3)"></div></div>
+      <div id="msgs"></div>
+      <div id="sendbar"><input id="msgIn" placeholder="Message… use @username to notify someone" autocomplete="off"><button id="sendBtn">Send</button></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,doc,setDoc,addDoc,deleteDoc,onSnapshot,query,orderBy,limit,serverTimestamp,getDocs,writeBatch,arrayUnion,arrayRemove} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getMessaging,getToken} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+const FIREBASE_CONFIG={apiKey:"AIzaSyC7tylN7VmPo5MntIwsoNQw5NhmGf-SasE",authDomain:"chat-68d6a.firebaseapp.com",projectId:"chat-68d6a",storageBucket:"chat-68d6a.firebasestorage.app",messagingSenderId:"828067301108",appId:"1:828067301108:web:242921194c21f6ffdc00a1"};
+const VAPID_KEY="BNyJudC9tMNoyo0xoGQPI4bImHK7qvAHuYdY9PYaA4JzTJpno6evLwp9Grgjq4Cpo-LBB6Z_rzI1nUTFWvmXTAs";
+const WORKER_URL="";
+const EMAIL_DOMAIN="chat.local";
+const EMAILS={admin:"admin@sky.com"};
+const ADMIN_EMAIL="admin@sky.com";
+const NAMES={admin:"SKY",rainbow:"rainbow",daksh:"light"};
+const app=initializeApp(FIREBASE_CONFIG),auth=getAuth(app),db=getFirestore(app);
+setPersistence(auth,browserLocalPersistence).catch(()=>{});
+const $=id=>document.getElementById(id),nm=u=>NAMES[u]||u;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let me='',isAdmin=false,chat={kind:'group',id:'',label:'Group chat'},profiles=[],unsubs=[],unsubChat=null;
+const dmWatch=new Map();
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3500)}
+$('loginForm').onsubmit=async e=>{e.preventDefault();$('err').textContent='';const u=$('u').value.trim().toLowerCase();try{await signInWithEmailAndPassword(auth,EMAILS[u]||(u.includes('@')?u:`${u}@${EMAIL_DOMAIN}`),$('p').value)}catch{$('err').textContent='Wrong username or password.'}};
+$('outBtn').onclick=logout;
+async function logout(){try{const t=localStorage.getItem('fcmToken');if(t&&me)await setDoc(doc(db,'tokens',me),{tokens:arrayRemove(t)},{merge:true})}catch{}localStorage.removeItem('fcmToken');signOut(auth)}
+onAuthStateChanged(auth,async user=>{
+ unsubs.forEach(f=>f());unsubs=[];if(unsubChat)unsubChat();dmWatch.forEach(f=>f());dmWatch.clear();
+ if(!user){$('app').style.display='none';$('login').style.display='flex';return}
+ me=user.email.split('@')[0].toLowerCase();isAdmin=user.email.toLowerCase()===ADMIN_EMAIL;
+ $('login').style.display='none';$('app').style.display='flex';$('p').value='';
+ $('whoami').textContent=nm(me)+(isAdmin?' (admin)':'');
+ document.querySelectorAll('.admin-only').forEach(b=>b.style.display=isAdmin?'flex':'none');
+ await setDoc(doc(db,'users',me),{name:nm(me),email:user.email},{merge:true});
+ unsubs.push(onSnapshot(collection(db,'users'),s=>{profiles=s.docs.map(d=>d.id);drawMembers()}));
+ let first=true;
+ unsubs.push(onSnapshot(doc(db,'control','logout'),s=>{if(first){first=false;return}const d=s.data();if(!d||isAdmin)return;if(d.target==='all'||d.target===me){toast('You were logged out by admin');logout()}}));
+ let gFirst=true;const escapedMe=me.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const mention=new RegExp('(^|[^\\w])@'+escapedMe+'(?=$|[^\\w])','i');
+ unsubs.push(onSnapshot(query(collection(db,'group'),orderBy('ts','desc'),limit(20)),snap=>{if(gFirst){gFirst=false;return}snap.docChanges().forEach(change=>{if(change.type!=='added')return;const message=change.doc.data();if(message.from!==me&&mention.test(message.text||''))alertUser((message.name||message.from)+' mentioned you',message.text||'','group','')})},err=>console.warn('Group mention listener failed:',err)));
+ autoNotif().catch(err=>console.warn('Notification re-registration failed:',err));openChat('group','','Group chat');
+});
+function drawMembers(){
+ const list=[...new Set([...Object.keys(NAMES),...profiles])].filter(u=>u!==me).sort();watchDMs(list);const box=$('members');box.innerHTML='';
+ const add=(label,sub,active,fn,kickUser)=>{const el=document.createElement('div');el.className='mem'+(active?' active':'');const l=document.createElement('span');l.textContent=label;const s=document.createElement('small');s.textContent=sub;l.append(' ',s);el.append(l);if(kickUser&&isAdmin){const k=document.createElement('button');k.className='kick';k.textContent='Kick';k.onclick=ev=>{ev.stopPropagation();setDoc(doc(db,'control','logout'),{target:kickUser,at:Date.now()});toast(nm(kickUser)+' logged out')};el.append(k)}el.onclick=fn;box.append(el)};
+ add('# Group chat','',chat.kind==='group',()=>openChat('group','','Group chat'));
+ list.forEach(u=>{const id=[me,u].sort().join('__');add(nm(u),'@'+u,chat.kind==='dm'&&chat.id===id,()=>openChat('dm',id,'Private · '+nm(u)),u)});
+}
+function watchDMs(list){list.forEach(u=>{const id=[me,u].sort().join('__');if(dmWatch.has(id))return;let first=true;dmWatch.set(id,onSnapshot(query(collection(db,'dms',id,'messages'),orderBy('ts','desc'),limit(1)),s=>{if(first){first=false;return}s.docChanges().forEach(c=>{if(c.type==='added'){const m=c.doc.data();if(m.from!==me)alertUser(m.name+' (private)',m.text,'dm',id)}}),()=>{}))})}
+function alertUser(title,body,kind,id){const message=String(body||'');toast(title+': '+message.slice(0,80));if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const options={body:message.slice(0,120),tag:kind+id+'-'+Date.now()};navigator.serviceWorker?.getRegistration().then(reg=>reg?reg.showNotification(title,options):new Notification(title,options)).catch(err=>console.warn('Browser notification failed:',err))}}
+async function pingWorker(c,text){if(!WORKER_URL)return;try{const idToken=await auth.currentUser.getIdToken();fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken,kind:c.kind,chat:c.id,text,name:nm(me)})})}catch{}}
+const colRef=()=>chat.kind==='group'?collection(db,'group'):collection(db,'dms',chat.id,'messages');
+function openChat(kind,id,label){
+ chat={kind,id,label};$('chatTitle').textContent=label;drawMembers();const canSend=kind==='group'||id.split('__').includes(me);
+ $('msgIn').disabled=$('sendBtn').disabled=!canSend;$('msgIn').placeholder=canSend?'Message… use @username to notify someone':'Read-only (admin monitor)';
+ if(unsubChat)unsubChat();
+ unsubChat=onSnapshot(query(colRef(),orderBy('ts','asc'),limit(300)),snap=>{const box=$('msgs');box.innerHTML='';snap.forEach(d=>{const m=d.data(),el=document.createElement('div');el.className='msg'+(m.from===me?' mine':'');const who=document.createElement('b');who.textContent=m.name||m.from;who.onclick=()=>{if(chat.kind==='group'&&m.from!==me){$('msgIn').value+='@'+m.from+' ';$('msgIn').focus()}};const t=document.createElement('time');t.textContent=m.ts?m.ts.toDate().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'…';const tx=document.createElement('div');tx.className='txt';tx.innerHTML=esc(m.text).replace(/@(\w+)/g,(_,n)=>`<span class="mention${n.toLowerCase()===me?' me':''}">@${n}</span>`);el.append(who,t,tx);if(isAdmin){const x=document.createElement('button');x.className='del';x.textContent='✕';x.onclick=()=>deleteDoc(d.ref);el.append(x)}box.append(el)});box.scrollTop=box.scrollHeight},err=>toast('Cannot open this chat: '+err.code));
+}
+async function send(){const text=$('msgIn').value.trim();if(!text)return;$('msgIn').value='';const c=chat;try{await addDoc(colRef(),{from:me,name:nm(me),text,ts:serverTimestamp()});pingWorker(c,text)}catch(e){toast('Send failed: '+e.code)}}
+$('sendBtn').onclick=send;$('msgIn').onkeydown=e=>{if(e.key==='Enter')send()};
+$('clearBtn').onclick=async()=>{if(!confirm('Delete ALL messages in "'+chat.label+'"?'))return;const s=await getDocs(colRef());let b=writeBatch(db),n=0;for(const d of s.docs){b.delete(d.ref);if(++n%400===0){await b.commit();b=writeBatch(db)}}await b.commit();toast('History cleared')};
+$('kickAllBtn').onclick=async()=>{await setDoc(doc(db,'control','logout'),{target:'all',at:Date.now()});toast('Everyone else was logged out')};
+$('monBtn').onclick=()=>{const r=prompt('Two usernames, e.g. alice,bob');if(!r)return;const p=r.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);if(p.length!==2)return toast('Enter exactly two usernames');openChat('dm',p.sort().join('__'),'Monitoring · '+nm(p[0])+' & '+nm(p[1]))};
+let messaging=null;try{messaging=getMessaging(app)}catch{}
+async function registerPush(){const reg=await navigator.serviceWorker.register('./firebase-messaging-sw.js');const token=await getToken(messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:reg});await setDoc(doc(db,'tokens',me),{tokens:arrayUnion(token)},{merge:true});localStorage.setItem('fcmToken',token)}
+async function autoNotif(){if(typeof Notification!=='undefined'&&Notification.permission==='granted'){$('notifBtn').textContent='Alerts on ✓';if(messaging)registerPush().catch(()=>{})}}
+$('notifBtn').onclick=async()=>{if(typeof Notification==='undefined')return toast('Notifications are not supported in this browser');if(await Notification.requestPermission()!=='granted')return toast('Notifications were blocked');$('notifBtn').textContent='Alerts on ✓';toast('Alerts enabled on this device');if(messaging){try{await registerPush()}catch(e){console.warn('push token failed',e)}}};
+</script>
+</body>
+</html>
